@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>''</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .dropdown-content {
+            display: none;
+        }
+        .dropdown-content.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto p-10 lg:p-20 text-center">
+        <h1 class="text-3xl font-bold mb-10 mt-20">Generate art through music</h1>
+        
+        <div class="relative inline-block text-center">
+            <form id="genreSelect" action="/generate" method="post">
+                <div>
+                    <label class="text-lg text-black text-center">Pick a genre:</label>
+                    <div>
+                        <button type="button" onclick="toggleDropdown()" class="inline-flex justify-center gap-x-1.5 rounded-md hover:ring-2 hover:outline-none hover:ring-black bg-transparent mt-3 px-3 py-2 text-sm text-black shadow-sm ring-1 ring-inset ring-gray-300" id="menu-button" aria-expanded="true" aria-haspopup="true">
+                            Select
+                            <svg class="h-5 w-20 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" transform="translate(25, 0)" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2 w-54 origin-top-left rounded-md text-left shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dropdown-content" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" id="dropdown-menu">
+                    <div class="py-1" role="none">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Rock" onclick="select(event)">Rock</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Electronic" onclick="select(event)">Electronic</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Hip-hop" onclick="select(event)">Hip-Hop</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Jazz" onclick="select(event)">Jazz</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Ambient" onclick="select(event)">Ambient</a>
+                    </div>
+                </div>
+                <input type="hidden" name="genre" id="genre">
+                <div class="flex justify-center mt-12">
+                    <button type="submit" class="px-5 py-3 rounded-xl text-white bg-black hover:bg-transparent hover:text-black hover:ring-2 hover:ring-black">Generate</button>
+                </div>
+            </form>
+        </div>
+
+        
+    </div>
+    <script>
+        function toggleDropdown() {
+            var dropdown = document.getElementById("dropdown-menu");
+            dropdown.classList.toggle("show");
+        }
+        function select(event) {
+            event.preventDefault();
+            var button = document.getElementById("menu-button");
+            var dropdown = document.getElementById("dropdown-menu");
+
+            var genre = event.target.getAttribute("value");
+
+            button.innerHTML = genre + '<svg class="h-5 w-20 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" transform="translate(25, 0)" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>';
+            dropdown.classList.remove("show");
+
+            document.getElementById("genre").value = genre;
+        }
+    </script>
+</body>
+</html>
