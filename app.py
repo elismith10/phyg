@@ -32,6 +32,7 @@ def home():
 def generate():
     session.clear()
     genre = request.form.get('genre')
+    custom_prompt = request.form.get('custom_prompt')
     if genre:
         print(genre)
         # Supabase authentification
@@ -62,8 +63,20 @@ def generate():
         ]
         selected_artist = random.choice(artists)
 
-        prompt = f"Generate an artistic piece that represents the song '{pseudo_name}', loudness {loudness} dB, tempo {bpm} BPM, key {key}, featuring instruments {instruments}, inspired by {selected_artist}."
+        # generate prompt
+        if custom_prompt:
+            print(custom_prompt)
+            prompt = f"""
+            Music features:
+            - Key: {selected_song["key"]},
+            - BPM: {selected_song["bpm"]},
+            - Genre: {selected_song["genre"]},
+            {custom_prompt}
+            """
+        else:
+            prompt = f"Generate an artistic piece that represents the song '{pseudo_name}', loudness {loudness} dB, tempo {bpm} BPM, key {key}, featuring instruments {instruments}, inspired by {selected_artist}."
         print(prompt)
+        
         image = pipe(prompt, num_inference_steps=1, height=16, width=16).images[0]
         img_byte_arr = io.BytesIO()
         image.save(img_byte_arr, format='JPEG', optimizer=True, compress_level=4)
