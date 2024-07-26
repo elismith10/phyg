@@ -41,6 +41,11 @@
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Ambient" onclick="select(event)">Ambient</a>
                     </div>
                 </div>
+                {% if error %}
+                        <div class="error-message text-gray-400 mt-2">
+                            {{ error }}
+                        </div>
+                {% endif %}
                 <input type="hidden" name="genre" id="genre">
                 <div class="flex justify-center mt-12">
                     <button type="submit" class="px-5 py-3 rounded-xl text-white bg-black hover:bg-transparent hover:text-black hover:ring-2 hover:ring-black">Generate</button>
