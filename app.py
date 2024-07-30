@@ -9,6 +9,7 @@ import random
 import zlib
 import base64
 from flask_session import Session
+from pyngrok import ngrok
 
 model_id = "CompVis/stable-diffusion-v1-4"
 pipe = StableDiffusionPipeline.from_pretrained(model_id)
@@ -67,42 +68,51 @@ def generate():
         if custom_prompt:
             print(custom_prompt)
             prompt = f"""
-            Music features:
-            - Key: {selected_song["key"]},
-            - BPM: {selected_song["bpm"]},
-            - Genre: {selected_song["genre"]},
-            {custom_prompt}
-            """
+                Music features:
+                - Key: {selected_song["key"]},
+                - BPM: {selected_song["bpm"]},
+                - Genre: {selected_song["genre"]},
+                {custom_prompt}
+                """
         else:
-            prompt = f"Generate an artistic piece that represents the song '{pseudo_name}', loudness {loudness} dB, tempo {bpm} BPM, key {key}, featuring instruments {instruments}, inspired by {selected_artist}."
+            prompt = f"""
+                Music features:
+                - Key: {selected_song["key"]},
+                - BPM: {selected_song["bpm"]},
+                - Genre: {selected_song["genre"]},
+                Create art inspired by {selected_artist}
+                """
         print(prompt)
         
-        image = pipe(prompt, num_inference_steps=1, height=16, width=16).images[0]
+        image = pipe(prompt).images[0] 
         img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='JPEG', optimizer=True, compress_level=4)
+        image.save(img_byte_arr, format='JPEG', optimizer=True)
         img_byte_arr.seek(0)
         
-        image_b64 = base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
+        temp_image_path = f"static/temp_{random.randint(0, 1000000)}.jpg"
+        with open(temp_image_path, "wb") as f:
+            f.write(img_byte_arr.getbuffer())
 
-        compressed = zlib.compress(img_byte_arr.getvalue())
-        session['image_bytes'] = compressed
+        session['image_file'] = temp_image_path
         session['genre'] = genre
 
-        return render_template('generate.html', song_url=song_url, song_name=pseudo_name, image=image_b64)
+        return render_template('index.html', showDisplay=True, song_url=song_url, song_name=pseudo_name, image=temp_image_path)
 
     return render_template('index.html', error='Please select a genre')
+
     
 @app.route('/download', methods=['POST'])
-def download_image():
-    if 'image_bytes' in session:
-        compressed = session['image_bytes']
-        image_bytes = zlib.decompress(compressed)
+def download():
+    if 'image_file' in session:
+        file_path = session['image_file']
         genre = session.get('genre')
-        
-        img_byte_arr = io.BytesIO(image_bytes)
-        img_byte_arr.seek(0)
-        return send_file(img_byte_arr, mimetype='image/jpeg', as_attachment=True, download_name=f'{genre}.jpeg')
+        print(f"{file_path}")
+        return send_file(file_path, as_attachment=True, download_name=f'{genre}.jpeg')
     return redirect('/')
 
 if __name__ == '__main__':
+    # public_url = ngrok.connect(5002)
+    # print(f" * ngrok tunnel \"{public_url}\" -> \"http://127.0.0.1:5002\"")
+    
+    # app.run(port=5002)
     app.run(debug=True)

@@ -16,10 +16,9 @@
     </style>
 </head>
 <body>
-    <div class="container mx-auto p-10 lg:p-20 text-center">
-        <h1 class="text-3xl font-bold mb-10 mt-20">Generate art through music</h1>
-        
-        <div class="relative inline-block text-center">
+    <div class="w-5/6 mx-auto p-10 lg:p-20 flex h-screen justify-between">
+        <div class="w-full lg:w-2/5 mb-4 lg:mb-0 lg:py-20 p-4">
+            <h1 class="text-5xl font-bold py-10">Generate art through music</h1>
             <form id="genreSelect" action="/generate" method="post">
                 <div>
                     <label class="text-lg text-black text-center">Pick a genre:</label>
@@ -32,7 +31,7 @@
                         </button>
                     </div>
                 </div>
-                <div class="mt-2 w-54 origin-top-left rounded-md text-left shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dropdown-content" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" id="dropdown-menu">
+                <div class="mt-2 w-54 origin-top-left rounded-lg text-left shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dropdown-content" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1" id="dropdown-menu">
                     <div class="py-1" role="none">
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Rock" onclick="select(event)">Rock</a>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-800" role="menuitem" tabindex="-1" value="Electronic" onclick="select(event)">Electronic</a>
@@ -42,22 +41,47 @@
                     </div>
                 </div>
                 {% if error %}
-                        <div class="error-message text-gray-400 mt-2">
-                            {{ error }}
-                        </div>
+                    <div class="error-message text-gray-400 mt-2">
+                        {{ error }}
+                    </div>
                 {% endif %}
                 <input type="hidden" name="genre" id="genre">
-                <div class="py-4">
+                <div class="py-4 w-3/4">
                     <label class="text-black">Enter custom prompt:</label>
                     <input type="text" id="custom_prompt" name="custom_prompt" class="w-full mt-2 px-4 py-2 rounded-lg hover:ring-2 hover:outline-none hover:ring-black bg-transparent ring-1 ring-inset ring-gray-300">
                 </div>
-                <div class="flex justify-center mt-12">
+                <div class="py-6 mb-4">
                     <button type="submit" class="px-5 py-3 rounded-xl text-white bg-black hover:bg-transparent hover:text-black hover:ring-2 hover:ring-black">Generate</button>
                 </div>
             </form>
         </div>
 
-        
+        <div class="w-full lg:w-3/5 p-4 border-1 border-gray-400 shadow-md rounded-3xl">
+            {% if showDisplay %}
+            <div class="flex flex-wrap mx-auto py-6 h-full w-full justify-center">
+                <div class="group h-3/4 relative aspect-w-1 aspect-h-1">
+                    <img src="{{ image }}" class="object-contain object-cover rounded-2xl w-full h-full">
+                    <div class="absolute bg-black/0 rounded-2xl group-hover:bg-black/50 w-full h-full top-0 flex items-center group-hover:opacity-100 transition justify-evenly">
+                        <form action="/download" method="post" class="mt-4">
+                            <button type="submit" class="hover:scale-110 text-white opacity-0 transform translate-y-3 group-hover:translate-y-0 group-hover:opacity-100 transition">
+                                <svg class="h-8 w-8 text-white"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  
+                                    <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />  <polyline points="7 11 12 16 17 11" />  <line x1="12" y1="4" x2="12" y2="16"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <label class="italic">{{ song_name }}</label>
+                    <div class="flex mx-auto justify-center py-3">
+                        <audio controls controlsList="nodownload noremoteplayback" class="rounded-full shadow-md">>
+                            <source src="{{ song_url }}" type="audio/mp3">
+                        </audio>
+                    </div>
+                </div> 
+            </div>
+            {% endif %}
+        </div>
     </div>
     <script>
         function toggleDropdown() {
