@@ -8,7 +8,7 @@ from supabase import create_client, Client
 import random
 import zlib
 import base64
-from flask_session import Session
+# from flask_session import Session
 from pyngrok import ngrok
 
 model_id = "CompVis/stable-diffusion-v1-4"
@@ -18,10 +18,10 @@ pipe = pipe.to("cpu")
 
 app = Flask(__name__)
 app.secret_key ='key'
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_PERMANENT'] = False
-app.config['SESSION_USE_SIGNER'] = True
-app.config['SESSION_KEY_PREFIX'] = 'app:'
+# app.config['SESSION_TYPE'] = 'filesystem'
+# app.config['SESSION_PERMANENT'] = False
+# app.config['SESSION_USE_SIGNER'] = True
+# app.config['SESSION_KEY_PREFIX'] = 'app:'
 
 Session(app)
 
