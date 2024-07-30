@@ -23,7 +23,7 @@ app.secret_key ='key'
 # app.config['SESSION_USE_SIGNER'] = True
 # app.config['SESSION_KEY_PREFIX'] = 'app:'
 
-Session(app)
+# Session(app)
 
 @app.route('/')
 def home():
