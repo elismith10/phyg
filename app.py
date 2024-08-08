@@ -1,29 +1,20 @@
 from flask import Flask, render_template, send_file, request, session, redirect
-from diffusers import StableDiffusionPipeline
+# from diffusers import StableDiffusionPipeline
 import torch
 from PIL import Image
 import io
 import pandas as pd
 from supabase import create_client, Client
 import random
-import zlib
-import base64
-# from flask_session import Session
+import replicate
 from pyngrok import ngrok
 
-model_id = "CompVis/stable-diffusion-v1-4"
-pipe = StableDiffusionPipeline.from_pretrained(model_id)
-pipe = pipe.to("cpu")
-
+# model_id = "CompVis/stable-diffusion-v1-4"
+# pipe = StableDiffusionPipeline.from_pretrained(model_id)
+# pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
 
 app = Flask(__name__)
 app.secret_key ='key'
-# app.config['SESSION_TYPE'] = 'filesystem'
-# app.config['SESSION_PERMANENT'] = False
-# app.config['SESSION_USE_SIGNER'] = True
-# app.config['SESSION_KEY_PREFIX'] = 'app:'
-
-# Session(app)
 
 @app.route('/')
 def home():
@@ -60,7 +51,8 @@ def generate():
             "Leonardo da Vinci", "Michelangelo", "Raphael", "Vincent van Gogh", "Pablo Picasso",
             "Claude Monet", "Salvador Dalí", "Frida Kahlo", "Andy Warhol", "Jackson Pollock",
             "Georgia O'Keeffe", "Rembrandt", "Johannes Vermeer", "Henri Matisse", "Edvard Munch",
-            "Paul Cézanne", "Gustav Klimt", "Wassily Kandinsky", "Marcel Duchamp", "Jean-Michel Basquiat"
+            "Paul Cézanne", "Gustav Klimt", "Wassily Kandinsky", "Marcel Duchamp", "Jean-Michel Basquiat",
+            "Walt Disney"
         ]
         selected_artist = random.choice(artists)
 
@@ -75,39 +67,47 @@ def generate():
                 {custom_prompt}
                 """
         else:
-            prompt = f"""
-                Music features:
-                - Key: {selected_song["key"]},
-                - BPM: {selected_song["bpm"]},
-                - Genre: {selected_song["genre"]},
-                Create art inspired by {selected_artist}
-                """
+            prompt = f"Create {selected_artist}-style art that represents the song \"{pseudo_name}\" that has tempo {bpm} BPM, key {key}, and genre {genre}"
         print(prompt)
-        
-        image = pipe(prompt).images[0] 
-        img_byte_arr = io.BytesIO()
-        image.save(img_byte_arr, format='JPEG', optimizer=True)
-        img_byte_arr.seek(0)
-        
-        temp_image_path = f"static/temp_{random.randint(0, 1000000)}.jpg"
-        with open(temp_image_path, "wb") as f:
-            f.write(img_byte_arr.getbuffer())
+        input = {
+            "prompt": prompt,
+            "output_quality":50
+        }
 
-        session['image_file'] = temp_image_path
-        session['genre'] = genre
+        output = replicate.run(
+            "black-forest-labs/flux-schnell",
+            input=input
+        )
+        print(output)
+        
+        # image = pipe(prompt).images[0] 
+        # img_byte_arr = io.BytesIO()
+        # image.save(img_byte_arr, format='JPEG', optimizer=True)
+        # img_byte_arr.seek(0)
+        
+        # temp_image_path = f"static/temp_{random.randint(0, 1000000)}.jpg"
+        # with open(temp_image_path, "wb") as f:
+        #     f.write(img_byte_arr.getbuffer())
 
-        return render_template('index.html', showDisplay=True, song_url=song_url, song_name=pseudo_name, image=temp_image_path)
+        # session['image_file'] = temp_image_path
+        # session['genre'] = genre
+
+        return render_template('index.html', showDisplay=True, song_url=song_url, song_name=pseudo_name, image=output[0])
 
     return render_template('index.html', error='Please select a genre')
 
     
 @app.route('/download', methods=['POST'])
 def download():
-    if 'image_file' in session:
-        file_path = session['image_file']
-        genre = session.get('genre')
-        print(f"{file_path}")
-        return send_file(file_path, as_attachment=True, download_name=f'{genre}.jpeg')
+    # if 'image_file' in session:
+    #     file_path = session['image_file']
+    #     genre = session.get('genre')
+    #     print(f"{file_path}")
+    #     return send_file(file_path, as_attachment=True, download_name=f'{genre}.jpeg')
+    image_uri = request.form.get('image_uri')
+    if image_uri:
+        print(image_uri)
+        return redirect(image_uri) 
     return redirect('/')
 
 if __name__ == '__main__':
